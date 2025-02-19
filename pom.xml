@@ -79,6 +79,11 @@
         </dependency>
         <dependency>
             <groupId>org.webjars.npm</groupId>
+            <artifactId>sockjs-client</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
             <artifactId>github-fork-ribbon-css</artifactId>
             <version>0.2.3</version>
         </dependency>

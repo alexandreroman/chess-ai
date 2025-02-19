@@ -69,7 +69,9 @@ class WebTests {
     @BeforeEach
     public void setUp() {
         final var driverOptions = new ChromeOptions();
-        //driverOptions.addArguments("--headless");
+        driverOptions.addArguments("--headless");
+        driverOptions.addArguments("--no-sandbox");
+        driverOptions.addArguments("--disable-dev-shm-usage");
         driver = new ChromeDriver(driverOptions);
         driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));

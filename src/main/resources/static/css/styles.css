@@ -74,10 +74,16 @@ header h1 {
   bottom: 0;
   left: 0;
   width: 100%;
-  transition: transform 0.2s ease-in-out; /* Animation de transition */
-  transform: translateY(100%); /* Initialement hors de l'écran */
+  transition: transform 0.2s ease-in-out;
+  transform: translateY(100%);
 }
 
 .collapse.show {
-  transform: translateY(0); /* Position finale */
+  transform: translateY(0);
+}
+
+/* For Safari only */
+
+_::-webkit-full-page-media, _:future, :root #chess-board table {
+  height: 0;
 }

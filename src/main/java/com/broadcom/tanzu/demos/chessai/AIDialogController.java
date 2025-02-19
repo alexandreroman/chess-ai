@@ -52,8 +52,11 @@ class AIDialogController {
     String form(@PathVariable String boardId,
                 @RequestParam(name = "show", required = false, defaultValue = "false") boolean showDialog,
                 @ModelAttribute("form") AIForm form, Model model) {
+        // Let's see if the user has already used the AI prompt.
         final var q = redis.opsForValue().get("chess::" + boardId + "::question");
         form.setQuestion(q);
+
+        // If showDialog is true then the AI prompt is made visible.
         model.addAttribute("showDialog", showDialog);
         return "ai-dialog-form-fragment";
     }
@@ -84,6 +87,7 @@ class AIDialogController {
         logger.atInfo().log("Asking AI a question related to board {}: {}", boardId, q);
         final var board = repo.load(boardId).orElseThrow();
 
+        // Build the prompt.
         final var prompt = new StringBuilder("""
                 Process this question from the player (using Markdown only for formatting):
                 
@@ -94,6 +98,8 @@ class AIDialogController {
                 """.trim());
         final var convEntries = redis.opsForList().range("chess::" + boardId + "::conversation", 0, -1);
         if (convEntries != null && !convEntries.isEmpty()) {
+            // Include past conversation entries in the prompt:
+            // this provides additional context for the LLM.
             prompt.append("\n\nAlso consider the past questions / answers in chronological order:");
             for (final var c : convEntries) {
                 prompt.append("\n\n").append(c);
@@ -103,10 +109,12 @@ class AIDialogController {
 
         final var resp = chatClient.prompt()
                 .user(p -> p.text(prompt.toString()).param("question", q))
+                // Include tools that may be used by the LLM to generate an answer.
                 .tools(new ChessGameTools(board.game(), chessEngine))
                 .call()
                 .content();
 
+        // As soon as we get an answer from the LLM, update past conversation entries.
         final var newConvEntry = """
                 <question>%s</question>
                 <answer>
@@ -114,8 +122,11 @@ class AIDialogController {
                 </answer>
                 """.formatted(q.trim(), resp.trim()).trim();
         redis.opsForList().rightPush("chess::" + boardId + "::conversation", newConvEntry);
+        // Clean up conversation entries: we remove the oldest elements.
         redis.opsForList().trim("chess::" + boardId + "::conversation", -maxConversationEntries, -1);
 
+        // The generated content should be Markdown formatted:
+        // render this content as HTML.
         return HtmlRenderer.builder().build().render(Parser.builder().build().parse(resp));
     }
 

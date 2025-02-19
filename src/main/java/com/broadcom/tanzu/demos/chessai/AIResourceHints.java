@@ -22,6 +22,9 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 class AIResourceHints implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        // Tell GraalVM to include additional content in the native image:
+        // in this case prompt templates are dynamically loaded,
+        // and they're not part of the native image by default.
         hints.resources().registerPattern("*.st");
     }
 }

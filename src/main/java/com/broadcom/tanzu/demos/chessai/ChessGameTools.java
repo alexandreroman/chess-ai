@@ -31,6 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Tools used by the LLM to answer player questions and find out the next move to play.
+ * Those tools provide additional context for the LLM, providing hints about the current game.
+ */
 class ChessGameTools {
     private final Logger logger = LoggerFactory.getLogger(com.broadcom.tanzu.demos.chessai.ChessGameTools.class);
     private final ChessGame game;

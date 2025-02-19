@@ -25,6 +25,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 class AsyncConfig {
     @Bean
     TaskExecutor taskExecutor() {
+        // Leverage a TaskExecutor to compute AI moves asynchronously.
         return new ThreadPoolTaskExecutor();
     }
 }

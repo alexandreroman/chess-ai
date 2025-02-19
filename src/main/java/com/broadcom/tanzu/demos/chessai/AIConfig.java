@@ -29,12 +29,14 @@ import org.springframework.core.io.Resource;
 
 @Configuration(proxyBeanMethods = false)
 @ImportRuntimeHints(AIResourceHints.class)
+// FIXME workaround for missing metadata in native image for OpenAiChatOptions and MistralAiChatOptions
 @RegisterReflection(classes = {ChessGameTools.class, OpenAiChatOptions.class, MistralAiChatOptions.class},
         memberCategories = {MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS})
 class AIConfig {
     @Bean
     ChatClient chatClient(ChatClient.Builder chatClientBuilder,
                           @Value("classpath:/system-message.st") Resource systemRes) {
+        // Configure a ChatClient instance used by the app.
         return chatClientBuilder
                 .defaultSystem(systemRes)
                 .build();

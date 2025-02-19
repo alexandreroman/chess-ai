@@ -53,10 +53,12 @@ class AnalyzeGameController {
         board.game().getPGNData().setPGNTag(PGNTag.WHITE, "Human");
         board.game().getPGNData().setPGNTag(PGNTag.BLACK, "AI");
 
+        // Export the board as PGN.
         final var buf = new ByteArrayOutputStream(1024);
         new PGNExporter(buf).write(board.game());
         final var pgn = buf.toString(StandardCharsets.UTF_8);
 
+        // Redirect to lichess.org and preload the PGN data.
         final var uri = UriComponentsBuilder
                 .fromUriString("https://lichess.org/paste")
                 .queryParam("pgn", pgn)

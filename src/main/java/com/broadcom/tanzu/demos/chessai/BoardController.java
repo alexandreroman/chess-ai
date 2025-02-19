@@ -69,6 +69,7 @@ class BoardController {
 
     @PostMapping("/chess/new")
     String newGame(Model model) {
+        // Create a new board instance and redirect to the board page.
         logger.atInfo().log("Starting new game");
         final var board = repo.newInstance();
         return "redirect:/chess/" + board.id();
@@ -88,6 +89,7 @@ class BoardController {
 
     @GetMapping("/chess/{boardId}/board")
     String boardFragment(@PathVariable String boardId, Model model, HttpServletResponse resp) {
+        // This method is called by HTMX to update the board state.
         logger.atDebug().log("Rendering board fragment: {}", boardId);
         final var board = repo.load(boardId).orElseThrow();
         model.addAttribute("board", board);
@@ -110,14 +112,19 @@ class BoardController {
 
         logger.atTrace().log("Board game result: {}={}", boardId, board.game().getGameResult());
 
+        // Main game loop: what happens when the player click on a square?
         if (board.game().getGameResultType() == null) {
+            // OK, so the game is not done yet.
             if (board.game().getSideToMove().equals(Side.WHITE)) {
                 if (board.currentSquare() == null) {
+                    // The player has clicked on a square, let's see if there is a White piece on it.
                     final var piece = board.game().getPiece(square);
                     if (piece != null && piece.side.equals(board.game().getSideToMove())) {
                         newBoard = new Board(boardId, board.game(), square.name, null);
                     }
                 } else {
+                    // At this point we know that the player has previously selected a piece:
+                    // let's see if we can move this piece to the selected square.
                     boolean promotion = false;
                     final var sq = Square.fromName(board.currentSquare());
                     final var sourcePiece = board.game().getPiece(sq);
@@ -129,6 +136,7 @@ class BoardController {
 
                     final var move = new Move(Square.fromName(board.currentSquare()), square, promotion ? PieceType.QUEEN : null);
                     if (board.game().isLegalMove(move)) {
+                        // This is a legal move, moving on!
                         logger.atInfo().log("Playing user move on board {}: {}", boardId, board.game().getNotation(NotationType.UCI, move));
                         board.game().playMove(move);
                         triggerAI = true;
@@ -168,10 +176,16 @@ class BoardController {
             return;
         }
 
-        final var resp = chatClient.prompt().user("""
-                What is the next move to play in this chess game?
-                """).tools(new ChessGameTools(board.game(), chessEngine)).call().entity(ChessBestMove.class);
+        // Trigger the LLM: let's find out the next move to play.
+        final var resp = chatClient.prompt()
+                .user("What is the next move to play in this chess game?")
+                // Include additional tools that the LLM can use to identify the next move.
+                .tools(new ChessGameTools(board.game(), chessEngine))
+                .call().entity(ChessBestMove.class);
         if (resp == null || resp.bestMove == null) {
+            // The LLM failed to identify the next move: this may happen if the game is done,
+            // if the chess engine is unable to provide the next move, or if the LLM failed to
+            // use the tools and cannot identify the move by itself.
             repo.save(new Board(board.id(), board.game(), null, Board.Error.UNABLE_TO_GUESS_NEXT_MOVE));
             refreshBoardUI(boardId);
             throw new IllegalStateException("No best move found for board " + boardId);
@@ -179,6 +193,7 @@ class BoardController {
         logger.atInfo().log("Playing AI move on board {}: {}", boardId, resp.bestMove);
         final Move move;
         try {
+            // Find out if the LLM move does use UCI.
             move = board.game().getMove(NotationType.UCI, resp.bestMove);
         } catch (Exception e) {
             repo.save(new Board(board.id(), board.game(), null, Board.Error.ILLEGAL_MOVE_FROM_AI));
@@ -186,11 +201,13 @@ class BoardController {
             throw new IllegalStateException("Unable to parse move from AI for board " + boardId + ": " + resp.bestMove, e);
         }
         if (!board.game().isLegalMove(move)) {
+            // During late game (and without using a chess engine) the LLM sometimes make illegal moves.
             repo.save(new Board(board.id(), board.game(), null, Board.Error.ILLEGAL_MOVE_FROM_AI));
             refreshBoardUI(boardId);
             throw new IllegalStateException("Invalid move from AI for board " + boardId + ": " + resp.bestMove);
         }
 
+        // Great, the AI has a move to play: let's update the board.
         logger.atDebug().log("Playing next move from AI on board {}: {}", board.id(), resp.bestMove);
         board.game().playMove(move);
         repo.save(new Board(board.id(), board.game(), null, null));

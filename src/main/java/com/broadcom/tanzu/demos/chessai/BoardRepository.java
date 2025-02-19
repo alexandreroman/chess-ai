@@ -33,7 +33,11 @@ class BoardRepository {
     private final StringRedisTemplate redis;
     private final String initialFen;
 
-    BoardRepository(StringRedisTemplate redis, @Value("${app.chess.initial}") String initialFen) {
+    // This is a core service of the app, as it enables to load / save a board state from a board id.
+    // Using this service we rely on Redis to store anything we need, which makes this app stateless.
+
+    BoardRepository(StringRedisTemplate redis,
+                    @Value("${app.chess.initial:rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1}") String initialFen) {
         this.redis = redis;
         this.initialFen = initialFen;
     }
@@ -73,6 +77,9 @@ class BoardRepository {
         try {
             final var game = new ChessGame(initialFen);
             if (movesStr != null && game.getInitialFen().equals(ChessGame.STANDARD_INITIAL_FEN)) {
+                // This is the core mechanic of this class:
+                // we have loaded all the moves from Redis, let's play these moves
+                // with a brand-new board instance to get back to the same state.
                 game.playMoves(NotationType.UCI, movesStr);
             }
 

@@ -22,5 +22,11 @@ import io.github.wolfraam.chessgame.move.Move;
 import java.util.Optional;
 
 public interface ChessEngine {
+    /**
+     * Get the next move to play.
+     *
+     * @param game board game instance
+     * @return the move to play eventually
+     */
     Optional<Move> getNextMove(ChessGame game);
 }

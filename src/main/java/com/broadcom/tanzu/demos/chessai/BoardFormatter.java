@@ -90,6 +90,8 @@ class BoardFormatter {
     }
 
     public String getSquareBackgroundClass(Board board, int row, int col) {
+        // Find out the CSS background class to use for a square.
+        // Much better to have this code in Java rather than a Thymeleaf script for better readability!
         final var sq = Square.fromCoordinates(col - 1, row - 1);
         if (sq.name.equals(board.currentSquare())) {
             return "current";

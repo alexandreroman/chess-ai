@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head>
+  <title>Chess AI</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap"
+        rel="stylesheet"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/dist/css/bootstrap.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/webjars/github-fork-ribbon-css/gh-fork-ribbon.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}"/>
+  <script th:src="@{/webjars/jquery/dist/jquery.slim.js}"></script>
+  <script th:src="@{/webjars/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
+  <script th:src="@{/webjars/stomp__stompjs/bundles/stomp.umd.js}"></script>
+  <script th:src="@{/js/board.js}"></script>
+</head>
+<body class="container text-center">
+
+<header class="m-4">
+  <h1>Chess AI</h1>
+  <a class="github-fork-ribbon top-bottom fixed" href="https://github.com/alexandreroman/chess-ai"
+     data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+</header>
+
+<main class="container p-0 m-0">
+  <section class="row chess-board-container d-flex justify-content-center">
+    <div class="col" style="margin-left: 2em">
+      <div th:replace="~{board-fragment}"></div>
+    </div>
+  </section>
+  <section class="mt-1">
+    <p class="fs-6 text-secondary">
+      powered by
+      <img th:src="@{/images/spring-ai-logo.png}" alt="Spring AI" width="103" height="24" style="margin-bottom: 3px"/>
+      with <span th:text="${model}"></span> + <span th:text="${@chessEngine}"></span>
+    </p>
+  </section>
+</main>
+
+<footer>
+  <section th:attr="hx-get=${'/chess/' + board.id() + '/ai'}" hx-trigger="load" hx-swap="outerHTML"></section>
+</footer>
+
+<script defer th:src="@{/webjars/font-awesome/js/all.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+    $(function () {
+        const cid = [[${board.id()}]];
+        subscribeToChessBoardUpdates(cid);
+    })
+</script>
+
+</body>
+</html>

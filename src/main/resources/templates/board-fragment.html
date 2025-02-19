@@ -1,0 +1,132 @@
+<div id="chess-board">
+  <div class="d-flex justify-content-center m-0 mb-4">
+    <div class="row">
+      <table class="chess-board text-black user-select-none"
+             style="width: 600px; height: 600px; min-width: 600px; max-width: 600px">
+        <tbody>
+        <th:block th:each="row : ${#numbers.sequence(8, 1, -1)}">
+          <tr>
+            <td th:each="col : ${#numbers.sequence(1, 8)}"
+                th:id="${'square-' + @boardFormatter.formatSquare(row, col)}"
+                class="position-relative"
+                th:classappend="${@boardFormatter.getSquareBackgroundClass(board, row, col)}"
+                hx-trigger="click"
+                th:attr="hx-post='/chess/' + ${board.id()} + '/click/' + ${@boardFormatter.formatSquare(row, col)}"
+                hx-target="#chess-board">
+              <i th:if="${@boardFormatter.formatPiece(board, row, col)}"
+                 th:classappend="${@boardFormatter.formatPiece(board, row, col)}"></i>
+              <i th:if="${@boardFormatter.isLegalMove(board, row, col)}"
+                 class="fa-solid fa-circle legal-move opacity-75 position-absolute"
+                 style="font-size: 40%; top: 37%; left: 37%"></i>
+              <p class="number m-0 p-0 position-absolute fw-bold" style="font-size: 30%; top: 0.7em; left: 0.1em"
+                 th:if="${col==1}"
+                 th:classappend="${row%2==0 ? 'text-dark':'text-light'}"
+                 th:text="${row}"></p>
+              <p class="letter m-0 p-0 position-absolute fw-bold" style="font-size: 30%; bottom: 0.7em; right: 0.2em"
+                 th:if="${row==1}"
+                 th:classappend="${col%2==0 ? 'text-dark':'text-light'}"
+                 th:text="${@boardFormatter.formatColumnNumber(col)}"></p>
+            </td>
+          </tr>
+        </th:block>
+        </tbody>
+      </table>
+      <div class="overflow-y-scroll text-start border rounded-4 p-3"
+           style="width: 190px; border-left: none !important; border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 80%; height: 600px">
+        <div class="container m-0 p-0 h-100 position-relative">
+          <div class="row" th:if="${board.error() != null}">
+            <div class="col">
+              <p class="text-danger fw-bold"
+                 th:if="${'ILLEGAL_MOVE_FROM_AI'.equals(board.error().name())}">
+                <i class="fa-solid fa-fw fa-bomb"></i>
+                Illegal move from AI
+              </p>
+              <p class="text-danger fw-bold"
+                 th:if="${'UNABLE_TO_GUESS_NEXT_MOVE'.equals(board.error().name())}">
+                <i class="fa-solid fa-fw fa-circle-exclamation"></i>
+                AI is unable to guess the next move
+              </p>
+            </div>
+          </div>
+          <div class="row" th:if="${board.game().getGameResultType() != null}">
+            <div class="col">
+              <p>
+              <span class="text-success fw-bold"
+                    th:if="${'WHITE_WINS'.equals(board.game().getGameResultType().name())}">🎉 You win!</span>
+                <span class="text-warning fw-bold"
+                      th:if="${'BLACK_WINS'.equals(board.game().getGameResultType().name())}">😱 AI wins!</span>
+                <span class="text-warning fw-bold"
+                      th:if="${'DRAW'.equals(board.game().getGameResultType().name())}">😐 Draw!</span>
+              </p>
+            </div>
+          </div>
+          <div class="row" th:if="${board.game().getGameResultType() == null && board.error() == null}">
+            <div class="col">
+              <p
+                th:if="${'BLACK'.equals(board.game().getSideToMove().name())}">
+                <span class="fa-3x fa-lg"><i class="fas fa-spinner fa-pulse"></i></span>
+                AI is thinking...</p>
+              <p
+                th:if="${'WHITE'.equals(board.game().getSideToMove().name())}">
+                <span class="fa-lg me-1"><i class="fa-solid fa-user"></i></span>Waiting for player...</p>
+            </div>
+          </div>
+          <div class="row" th:if="${@boardFormatter.formatLastMove(board)}">
+            <div class="col">
+              <p class="mb-0"><span class="text-muted">Last move:</span>
+                <span class="fw-bold" th:text="${@boardFormatter.formatLastMove(board)}"></span></p>
+            </div>
+          </div>
+          <div class="row" th:if="${@boardFormatter.formatLastMove(board)}">
+            <div class="col">
+              <p><span class="text-muted">Round:</span>
+                <span class="fw-bold" th:text="'#' + ${board.game().getFullMoveCount()}"></span></p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col text-center">
+              <div class="position-absolute" style="bottom: 0; left: 0; right: 0">
+                <div class="d-flex justify-content-center mb-3">
+                  <button data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Copy board state"
+                          onclick="copyBoardStateToClipboard()" class="btn btn-outline-secondary me-2">
+                    <i class="fa-solid fa-copy"></i></button>
+                  <a role="button" data-bs-toggle="popover" data-bs-trigger="hover focus"
+                     data-bs-content="Analyze game on lichess.org" target="_blank"
+                     class="btn btn-outline-secondary me-2" th:href="${'/chess/' + board.id() + '/analyze'}">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                  </a>
+                  <a role="button" data-bs-toggle="popover" data-bs-trigger="hover focus"
+                     data-bs-content="Exit game"
+                     class="btn btn-outline-secondary" th:href="@{/}">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                  </a>
+                </div>
+                <button data-bs-toggle="collapse" data-bs-target="#ai-dialog" aria-expanded="false"
+                        aria-controls="ai-dialog" class="btn btn-primary w-100">
+                  Ask AI
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-absolute top-50 start-50 p-0">
+    <div class="position-relative" style="top: -50%; left: -50%">
+      <div id="copyToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="1000">
+        <div class="toast-body p-2 m-0">Board state copied to your clipboard.</div>
+      </div>
+    </div>
+  </div>
+
+  <textarea id="moves" class="d-none" th:text="${@boardFormatter.formatMovesToCopy(board)}"></textarea>
+  <script type="text/javascript">
+      _initPopups();
+  </script>
+</div>

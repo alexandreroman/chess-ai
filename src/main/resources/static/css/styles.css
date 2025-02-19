@@ -1,0 +1,83 @@
+header h1 {
+  font-family: "Lora", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.github-fork-ribbon:before {
+  background-color: black;
+}
+
+.chess-board-container {
+  position: relative;
+  left: -1em;
+  top: 0.5em;
+}
+
+.chess-board {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.chess-board th {
+  padding: .5em;
+}
+
+.chess-board th:first-child,
+.chess-board td:last-child {
+  border-right: 1px solid #000;
+}
+
+.chess-board tr:last-child td {
+  border-bottom: 1px solid;
+}
+
+.chess-board th:empty {
+  border: none;
+}
+
+.chess-board td {
+  width: 1.5em;
+  height: 1.5em;
+  text-align: center;
+  font-size: 48px;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.chess-board .light {
+  background: #f0d9b5;
+}
+
+.chess-board .dark {
+  background: #b58863;
+}
+
+.chess-board .current {
+  background: darkorange;
+}
+
+.chess-board .legal-move {
+  color: forestgreen;
+}
+
+.chess-board .king-attacked {
+  background: darkred;
+}
+
+.chess-board .last-move {
+  background: darksalmon;
+}
+
+.collapse-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  transition: transform 0.2s ease-in-out; /* Animation de transition */
+  transform: translateY(100%); /* Initialement hors de l'écran */
+}
+
+.collapse.show {
+  transform: translateY(0); /* Position finale */
+}

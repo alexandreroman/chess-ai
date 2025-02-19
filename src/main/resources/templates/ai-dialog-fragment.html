@@ -1,0 +1,28 @@
+<section class="collapse show collapse-bottom text-start" id="ai-dialog">
+  <div class="card mb-0 mx-auto rounded-4"
+       style="width: 790px; border-bottom: none; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important">
+    <div class="card-body pb-0">
+      <div class="d-flex mb-1">
+        <p class="card-title text-secondary flex-fill">
+          <i class="fa-solid fa-fw fa-circle-question"></i>
+          Ask AI
+        </p>
+        <button class="btn btn-close" data-bs-toggle="collapse" data-bs-target="#ai-dialog"></button>
+      </div>
+      <div class="d-flex mb-3">
+        <input type="text" class="form-control flex-fill"
+               th:value="${form.question}" disabled/>
+        <a class="ms-2 btn btn-outline-secondary" role="button"
+           hx-target="#ai-dialog" hx-swap="outerHTML" th:attr="hx-get=${'/chess/' + boardId + '/ai?show=true'}">
+          <i class="fa-solid fa-fw fa-rotate-right"></i>
+        </a>
+      </div>
+
+      <section class="overflow-y-scroll" style="max-height: 330px;">
+        <div class="mb-3" th:attr="hx-get=${'/chess/' + boardId + '/ai/answer'}" hx-trigger="load">
+          <span class="fa-3x fa-lg"><i class="fas fa-fw fa-spinner fa-pulse"></i></span>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head>
+  <title>Chess AI</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap"
+        rel="stylesheet"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/dist/css/bootstrap.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/webjars/github-fork-ribbon-css/gh-fork-ribbon.css}"/>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}"/>
+</head>
+<body class="container text-center">
+
+<header class="m-4">
+  <h1>Chess AI</h1>
+  <a class="github-fork-ribbon top-bottom fixed" href="https://github.com/alexandreroman/chess-ai"
+     data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+</header>
+
+<main class="p-4">
+  <section class="pt-1 pb-4">
+    <p>Welcome to <strong>Chess AI</strong>, your companion website to play chess with an Artificial Intelligence.</p>
+    <p>
+      <img th:src="@{/images/bot-playing-chess.jpg}"
+           alt="A bot playing chess" width="400" height="400"
+           class="img-fluid border border-light rounded-2"/>
+    </p>
+    <p class="fs-6 text-secondary">
+      powered by
+      <img th:src="@{/images/spring-ai-logo.png}" alt="Spring AI" width="103" height="24" style="margin-bottom: 3px"/>
+      with <span th:text="${model}"></span> + <span th:text="${@chessEngine}"></span>
+    </p>
+  </section>
+  <form th:action="@{/chess/new}" method="post">
+    <input id="new-game" class="btn btn-primary" type="submit" value="Start a new game"/>
+  </form>
+</main>
+
+<script th:src="@{/webjars/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+
+</body>
+</html>

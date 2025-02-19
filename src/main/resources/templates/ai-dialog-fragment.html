@@ -18,7 +18,7 @@
         </a>
       </div>
 
-      <section class="overflow-y-scroll" style="max-height: 330px;">
+      <section class="overflow-y-auto" style="max-height: 330px;">
         <div class="mb-3" th:attr="hx-get=${'/chess/' + boardId + '/ai/answer'}" hx-trigger="load">
           <span class="fa-3x fa-lg"><i class="fas fa-fw fa-spinner fa-pulse"></i></span>
         </div>

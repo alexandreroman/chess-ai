@@ -201,7 +201,7 @@ class BoardController {
             throw new IllegalStateException("Unable to parse move from AI for board " + boardId + ": " + resp.bestMove, e);
         }
         if (!board.game().isLegalMove(move)) {
-            // During late game (and without using a chess engine) the LLM sometimes make illegal moves.
+            // During late game (and without a chess engine) the LLM sometimes makes illegal moves.
             repo.save(new Board(board.id(), board.game(), null, Board.Error.ILLEGAL_MOVE_FROM_AI));
             refreshBoardUI(boardId);
             throw new IllegalStateException("Invalid move from AI for board " + boardId + ": " + resp.bestMove);

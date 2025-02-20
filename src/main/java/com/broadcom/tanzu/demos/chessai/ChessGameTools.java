@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 /**
  * Tools used by the LLM to answer player questions and find out the next move to play.
- * Those tools provide additional context for the LLM, providing hints about the current game.
+ * Those tools provide additional context for the LLM, giving hints about the current game.
  */
 class ChessGameTools {
     private final Logger logger = LoggerFactory.getLogger(com.broadcom.tanzu.demos.chessai.ChessGameTools.class);
@@ -162,13 +162,13 @@ class ChessGameTools {
             - DRAW
             - BLACK_WINS
             - WHITE_WINS
-            - 'null' if the game is still in progress
+            - IN_PROGRESS
             """)
     String getGameResult() {
         final var gameResult = game.getGameResultType();
         if (gameResult == null) {
-            logger.atTrace().log("Reading game result: game is done");
-            return null;
+            logger.atTrace().log("Reading game result: game is in progress");
+            return "IN_PROGRESS";
         }
         final var r = gameResult.name();
         logger.atTrace().log("Reading game result from current game: {}", r);

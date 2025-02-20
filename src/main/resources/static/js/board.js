@@ -27,6 +27,7 @@ function _initStompClient() {
     const stompConfig = {
         // FIXME use SockJS instead of WebSocket until Spring Cloud Gateway MVC gets Websocket support
         //brokerURL: "/ws",
+        webSocketFactory: () => new SockJS('/ws'),
 
         debug: function (str) {
             if (DEBUG) console.log('STOMP: ' + str);
@@ -53,12 +54,6 @@ function _initStompClient() {
 
     // Create an instance.
     stompClient = new StompJs.Client(stompConfig);
-
-    // FIXME keep this until Spring Cloud Gateway MVC gets WebSocket support
-    stompClient.webSocketFactory = function () {
-        if(DEBUG) console.log('Enabling SockJS');
-        return new SockJS('/stomp');
-    };
 
     // Attempt to connect.
     stompClient.activate();

@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.PostExchange;
 
 interface ChessApi {
-    @PostExchange("/v1")
+    @PostExchange("/")
     ChessApiResponse getNextMove(@RequestBody ChessApiRequest req);
 }
 
-record ChessApiRequest(String fen) {
+record ChessApiRequest(String fen, int depth) {
 }
 
-record ChessApiResponse(String move, Integer mate) {
+record ChessApiResponse(String bestMove, Integer mate) {
 }

@@ -35,21 +35,21 @@ class ChessApiEngine implements ChessEngine {
 
     public Optional<Move> getNextMove(ChessGame game) {
         final var fen = game.getFen();
-        logger.atDebug().log("Using Chess-API.com to guess next move using FEN: {}", fen);
-        final var resp = api.getNextMove(new ChessApiRequest(fen));
-        final var rawMove = resp != null ? resp.move() : null;
+        logger.atDebug().log("Using Chess-API.online to guess next move using FEN: {}", fen);
+        final var resp = api.getNextMove(new ChessApiRequest(fen, 5));
+        final var rawMove = resp != null ? resp.bestMove() : null;
         if (rawMove == null) {
-            logger.atWarn().log("No next move found using Chess-API.com using FEN: {}", fen);
+            logger.atWarn().log("No next move found using Chess-API.online using FEN: {}", fen);
             return Optional.empty();
         }
 
         final var nextMove = game.getMove(NotationType.UCI, rawMove);
-        logger.atInfo().log("Found next move with Chess-API.com using FEN '{}': {}", fen, nextMove);
+        logger.atInfo().log("Found next move with Chess-API.online using FEN '{}': {}", fen, nextMove);
         return Optional.of(nextMove);
     }
 
     @Override
     public String toString() {
-        return "Chess-API.com";
+        return "Chess-API.online";
     }
 }

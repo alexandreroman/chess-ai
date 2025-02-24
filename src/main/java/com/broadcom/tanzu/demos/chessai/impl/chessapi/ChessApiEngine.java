@@ -36,7 +36,7 @@ class ChessApiEngine implements ChessEngine {
     public Optional<Move> getNextMove(ChessGame game) {
         final var fen = game.getFen();
         logger.atDebug().log("Using Chess-API.online to guess next move using FEN: {}", fen);
-        final var resp = api.getNextMove(new ChessApiRequest(fen, 5));
+        final var resp = api.getNextMove(new ChessApiRequest(fen, 3));
         final var rawMove = resp != null ? resp.bestMove() : null;
         if (rawMove == null) {
             logger.atWarn().log("No next move found using Chess-API.online using FEN: {}", fen);

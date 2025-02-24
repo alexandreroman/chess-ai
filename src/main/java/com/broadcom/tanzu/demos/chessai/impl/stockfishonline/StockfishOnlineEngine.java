@@ -38,7 +38,7 @@ class StockfishOnlineEngine implements ChessEngine {
     public Optional<Move> getNextMove(ChessGame game) {
         final var fen = game.getFen();
         logger.atDebug().log("Using Stockfish.online to guess next move using FEN: {}", fen);
-        final var resp = api.getNextMove(fen, 10);
+        final var resp = api.getNextMove(fen, 3);
         if (resp == null || !resp.success()) {
             logger.atWarn().log("No next move found using Stockfish.online using FEN: {}", fen);
             return Optional.empty();

@@ -1,4 +1,4 @@
-<div id="chess-board">
+<div id="chess-board" th:attr="hx-get='/chess/' + ${board.id()} + '/board'" hx-trigger="every 60s">
   <div class="d-flex justify-content-center m-0 mb-4">
     <table class="chess-board text-black user-select-none"
            style="width: 60%; max-width: 600px; aspect-ratio: 1/1">

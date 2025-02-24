@@ -158,6 +158,14 @@ class BoardController {
                 try {
                     playNextMoveForBlack(boardId);
                 } catch (Exception e) {
+                    final Board.Error error;
+                    if (e instanceof AIMoveError) {
+                        error = ((AIMoveError) e).error;
+                    } else {
+                        error = Board.Error.ILLEGAL_MOVE_FROM_AI;
+                    }
+                    repo.save(new Board(board.id(), board.game(), null, error));
+                    refreshBoardUI(boardId);
                     logger.atWarn().log("Failed to play next move for AI", e);
                 }
             });
@@ -186,9 +194,8 @@ class BoardController {
             // The LLM failed to identify the next move: this may happen if the game is done,
             // if the chess engine is unable to provide the next move, or if the LLM failed to
             // use the tools and cannot identify the move by itself.
-            repo.save(new Board(board.id(), board.game(), null, Board.Error.UNABLE_TO_GUESS_NEXT_MOVE));
-            refreshBoardUI(boardId);
-            throw new IllegalStateException("No best move found for board " + boardId);
+            logger.atDebug().log("No best move found for board {}", boardId);
+            throw new AIMoveError(Board.Error.UNABLE_TO_GUESS_NEXT_MOVE, null);
         }
         logger.atInfo().log("Playing AI move on board {}: {}", boardId, resp.bestMove);
         final Move move;
@@ -196,15 +203,13 @@ class BoardController {
             // Find out if the LLM move does use UCI.
             move = board.game().getMove(NotationType.UCI, resp.bestMove);
         } catch (Exception e) {
-            repo.save(new Board(board.id(), board.game(), null, Board.Error.ILLEGAL_MOVE_FROM_AI));
-            refreshBoardUI(boardId);
-            throw new IllegalStateException("Unable to parse move from AI for board " + boardId + ": " + resp.bestMove, e);
+            logger.atDebug().log("Unable to parse move from AI for board {}: {}", boardId, resp.bestMove);
+            throw new AIMoveError(Board.Error.ILLEGAL_MOVE_FROM_AI, e);
         }
         if (!board.game().isLegalMove(move)) {
             // During late game (and without a chess engine) the LLM sometimes makes illegal moves.
-            repo.save(new Board(board.id(), board.game(), null, Board.Error.ILLEGAL_MOVE_FROM_AI));
-            refreshBoardUI(boardId);
-            throw new IllegalStateException("Invalid move from AI for board " + boardId + ": " + resp.bestMove);
+            logger.atDebug().log("Invalid move from AI for board {}: {}", boardId, resp.bestMove);
+            throw new AIMoveError(Board.Error.ILLEGAL_MOVE_FROM_AI, null);
         }
 
         // Great, the AI has a move to play: let's update the board.
@@ -231,5 +236,14 @@ class BoardController {
             Best move to play in Universal Chess Interface (UCI) format.
             The value is 'null' if the next move to play is undefined or unknown.
             """) String bestMove) {
+    }
+
+    class AIMoveError extends RuntimeException {
+        private final Board.Error error;
+
+        AIMoveError(Board.Error error, Throwable cause) {
+            super("AI move error: " + error, cause);
+            this.error = error;
+        }
     }
 }

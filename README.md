@@ -83,6 +83,23 @@ is plugged as an AI tool to improve the gaming experience.
 
 [Stockfish.online](https://stockfish.online/) is used as the chess engine for this app.
 
+You may also enable [Chess-API.online](http://chess-api.online/) as an alternative.
+
+You can even choose to disable any chess engine, and rely on the LLM to guess the next move.
+
+Pick your favorite chess engine by setting this environment variable:
+
+* Stockfish.online: `CHESS_ENGINE=stockfishonline`
+* Chess-API.online: `CHESS_ENGINE=chessapi`
+* None (trust your LLM!): `CHESS_ENGINE=none`
+
+Then run the app with this environment variable:
+
+```shell
+export CHESS_ENGINE=none
+./mvnw spring-boot:run -Dspring-boot.run.profiles=mistralai
+```
+
 Enjoy! 🥳
 
 ## Usage

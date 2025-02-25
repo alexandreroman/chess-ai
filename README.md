@@ -53,13 +53,15 @@ with various AI strategies.
    ./mvnw spring-boot:run -Dspring-boot.run.profiles=<AI profile, see below>
    ```
 
-The application has been tested with Mistral AI, OpenAI, Gemma, and Llama.
+The application has been tested with Mistral AI, OpenAI, Gemma, Llama and Claude.
 Gemma and Llama are provided through [Groq Cloud](https://groq.com/)
 and its OpenAI compatible endpoint.
 
 Mistral AI is used by default: just set environment variable `MISTRALAI_API_KEY`.
 
 For OpenAI: set environment variable `OPENAI_API_KEY`.
+
+For Claude: set environment variable `ANTHROPIC_API_KEY`.
 
 For other AI models, you need a Groq API key, defined by the environment variable `GROQ_API_KEY`.
 
@@ -69,6 +71,7 @@ Depending on the AI model you want to run, you need to enable the according Spri
 * OpenAI: `openai`
 * Gemma: `gemma`
 * Llama: `llama`
+* Claude: `claude`
 
 For instance, run this app with OpenAI:
 

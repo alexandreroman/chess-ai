@@ -18,14 +18,10 @@ package com.broadcom.tanzu.demos.chessai;
 
 import io.github.wolfraam.chessgame.ChessGame;
 import io.github.wolfraam.chessgame.notation.NotationType;
-import io.github.wolfraam.chessgame.pgn.PGNExporter;
-import io.github.wolfraam.chessgame.pgn.PGNTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,15 +137,7 @@ class ChessGameTools {
             Use this tool to analyze all the moves played in the game.
             """)
     String getPGNData() {
-        if (!game.getAvailablePGNTags().contains(PGNTag.RESULT)) {
-            game.getPGNData().setPGNTag(PGNTag.RESULT, "*");
-        }
-        game.getPGNData().setPGNTag(PGNTag.WHITE, "Human");
-        game.getPGNData().setPGNTag(PGNTag.BLACK, "AI");
-
-        final var buf = new ByteArrayOutputStream(1024);
-        new PGNExporter(buf).write(game);
-        final var pgn = buf.toString(StandardCharsets.UTF_8);
+        final var pgn = ChessGameUtils.getPGNData(game);
         logger.atTrace().log("Getting PGN data: {}", pgn);
         return pgn;
     }

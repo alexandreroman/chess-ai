@@ -187,21 +187,34 @@ class BoardController {
         // Trigger the LLM: let's find out the next move to play.
         logger.atDebug().log("Guessing next move using chess game tools for board: {}", boardId);
         var resp = chatClient.prompt()
-                .user("What is the next move to play in this chess game?")
+                .user("""
+                        What is the next move to play in this chess game?
+                        Answer with one move only using UCI notation (source square-target square).
+                        Do not include anything else in your answer.
+                        """)
                 // Include additional tools that the LLM can use to identify the next move.
                 .tools(new ChessGameTools(board.game(), chessEngine))
                 .call().entity(ChessBestMove.class);
-        if (resp == null || resp.bestMove == null) {
+        if (resp == null || resp.isNull()) {
             logger.atDebug().log("Failed to get next move using chess game tools, trying with a FEN only for board: {}", boardId);
             resp = chatClient.prompt()
                     .user(p -> p.text("""
                                     You're playing a chess game: you're playing Black.
-                                    Consider this FEN as the current board state: {fen}
+                                    Consider this FEN as the current board state (surrounded by a fen tag): <fen>{fen}</fen>
+                                    
+                                    Here are the board state and past moves using PGN (surrounded by a pgn tag):
+                                    <pgn>
+                                    {pgn}
+                                    </pgn>
+                                    
                                     What is the next move to play?
+                                    Answer with one move only using UCI notation (source square-target square).
+                                    Do not include anything else in your answer.
                                     """)
-                            .param("fen", board.game().getFenSmall()))
+                            .param("fen", board.game().getFen())
+                            .param("pgn", ChessGameUtils.getPGNData(board.game())))
                     .call().entity(ChessBestMove.class);
-            if (resp == null || resp.bestMove == null) {
+            if (resp == null || resp.isNull()) {
                 // The LLM failed to identify the next move: this may happen if the game is done,
                 // if the chess engine is unable to provide the next move, or if the LLM failed to
                 // use the tools and cannot identify the move by itself.
@@ -248,6 +261,9 @@ class BoardController {
             Best move to play in Universal Chess Interface (UCI) format.
             The value is 'null' if the next move to play is undefined or unknown.
             """) String bestMove) {
+        boolean isNull() {
+            return bestMove == null || "null".equals(bestMove);
+        }
     }
 
     class AIMoveError extends RuntimeException {

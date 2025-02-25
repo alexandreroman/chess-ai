@@ -162,7 +162,7 @@ class BoardController {
                     if (e instanceof AIMoveError) {
                         error = ((AIMoveError) e).error;
                     } else {
-                        error = Board.Error.ILLEGAL_MOVE_FROM_AI;
+                        error = Board.Error.SERVER_ERROR;
                     }
                     repo.save(new Board(board.id(), board.game(), null, error));
                     refreshBoardUI(boardId);
@@ -185,17 +185,29 @@ class BoardController {
         }
 
         // Trigger the LLM: let's find out the next move to play.
-        final var resp = chatClient.prompt()
+        logger.atDebug().log("Guessing next move using chess game tools for board: {}", boardId);
+        var resp = chatClient.prompt()
                 .user("What is the next move to play in this chess game?")
                 // Include additional tools that the LLM can use to identify the next move.
                 .tools(new ChessGameTools(board.game(), chessEngine))
                 .call().entity(ChessBestMove.class);
         if (resp == null || resp.bestMove == null) {
-            // The LLM failed to identify the next move: this may happen if the game is done,
-            // if the chess engine is unable to provide the next move, or if the LLM failed to
-            // use the tools and cannot identify the move by itself.
-            logger.atDebug().log("No best move found for board {}", boardId);
-            throw new AIMoveError(Board.Error.UNABLE_TO_GUESS_NEXT_MOVE, null);
+            logger.atDebug().log("Failed to get next move using chess game tools, trying with a FEN only for board: {}", boardId);
+            resp = chatClient.prompt()
+                    .user(p -> p.text("""
+                                    You're playing a chess game: you're playing Black.
+                                    Consider this FEN as the current board state: {fen}
+                                    What is the next move to play?
+                                    """)
+                            .param("fen", board.game().getFenSmall()))
+                    .call().entity(ChessBestMove.class);
+            if (resp == null || resp.bestMove == null) {
+                // The LLM failed to identify the next move: this may happen if the game is done,
+                // if the chess engine is unable to provide the next move, or if the LLM failed to
+                // use the tools and cannot identify the move by itself.
+                logger.atDebug().log("No best move found for board {}", boardId);
+                throw new AIMoveError(Board.Error.UNABLE_TO_GUESS_NEXT_MOVE, null);
+            }
         }
         logger.atInfo().log("Playing AI move on board {}: {}", boardId, resp.bestMove);
         final Move move;

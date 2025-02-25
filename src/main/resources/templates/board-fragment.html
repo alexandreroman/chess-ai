@@ -45,6 +45,11 @@
               <i class="fa-solid fa-fw fa-circle-exclamation"></i>
               AI is unable to guess the next move
             </p>
+            <p class="text-danger fw-bold"
+               th:if="${'SERVER_ERROR'.equals(board.error().name())}">
+              <i class="fa-solid fa-fw fa-bomb"></i>
+              Server error
+            </p>
           </div>
         </div>
         <div class="row" th:if="${board.game().getGameResultType() != null}">

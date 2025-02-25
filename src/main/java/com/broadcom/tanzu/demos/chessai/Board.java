@@ -25,6 +25,7 @@ record Board(
         Error error
 ) {
     enum Error {
+        SERVER_ERROR,
         ILLEGAL_MOVE_FROM_AI,
         UNABLE_TO_GUESS_NEXT_MOVE,
         CHECK_MATE
